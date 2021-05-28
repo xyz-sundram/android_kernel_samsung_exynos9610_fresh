@@ -2862,8 +2862,11 @@ static int futex_lock_pi(u32 __user *uaddr, unsigned int flags,
 	struct hrtimer_sleeper timeout, *to = NULL;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 	struct futex_pi_state *pi_state = NULL;
 	struct task_struct *exiting = NULL;
+=======
+>>>>>>> 0b35fae8d82a... Revert "futex: Prevent exit livelock"
 =======
 >>>>>>> 0b35fae8d82a... Revert "futex: Prevent exit livelock"
 =======
