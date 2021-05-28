@@ -6767,10 +6767,10 @@ schedtune_margin(unsigned long signal, long boost, unsigned long capacity)
 	 * The obtained M could be used by the caller to "boost" S.
 	 */
 	if (boost >= 0) {
-+		if (capacity > signal) {
-+			margin  = capacity - signal;
-+			margin *= boost;
-+		}
+		if (capacity > signal) {
+			margin  = capacity - signal;
+			margin *= boost;
+		}
 	} else
 		margin = -signal * boost;
 
