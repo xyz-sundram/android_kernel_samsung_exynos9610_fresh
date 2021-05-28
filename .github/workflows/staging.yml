@@ -1,0 +1,459 @@
+name: Build Staging (Stable) Build
+
+on:
+  push:
+    branches: [ staging ]
+  pull_request:
+    branches: [ staging ]
+
+jobs:
+  a50:
+    name: Build Galaxy A50 (One UI)
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Manila"
+        timezoneMacos: "Asia/Manila"
+        timezoneWindows: "Philippine Standard Time"
+      
+    - name: Install Debian/Ubuntu dependencies
+      run: sudo apt-get install build-essential libelf-dev kernel-package bzip2 lib32stdc++6 libc6-dev-i386 git -y
+
+    - name: Install Toolchain
+      run: |
+          set -eo pipefail
+          git clone https://github.com/CruelKernel/aarch64-cruel-elf.git ${HOME}/toolchain
+          mkdir -p ${HOME}/toolchain_arm32
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz --output-document=${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
+          tar -xvf ${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz -C ${HOME}/toolchain_arm32
+        
+    - name: Build Kernel
+      run: |
+          set -eo pipefail
+          echo "  I: Building FreshCore CI $GITHUB_RUN_NUMBER"
+          export KBUILD_BUILD_VERSION=$GITHUB_RUN_NUMBER
+          ./build.sh a50 ci
+          
+    - name: Prepare Release
+      run: |
+          mkdir -p ./release
+          mv -f `find ./ -iname FRSH_CORE_*.zip` ./release/
+          cp .config ./release/kernel_config_a50.txt
+
+    - name: Upload image artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 Kernel Image (staging-${{ github.run_number }})
+        path: 'tools/package/others/boot.img'
+        if-no-files-found: error
+
+    - name: Upload config artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 Kernel Config (staging-${{ github.run_number }})
+        path: 'release/kernel_config_a50.txt'
+        if-no-files-found: error
+
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: a50_release_staging-${{ github.run_number }})
+        path: 'release'
+        if-no-files-found: error
+
+  a50cs:
+    name: Build Galaxy A50 (One UI; NA)
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Manila"
+        timezoneMacos: "Asia/Manila"
+        timezoneWindows: "Philippine Standard Time"
+      
+    - name: Install Debian/Ubuntu dependencies
+      run: sudo apt-get install build-essential libelf-dev kernel-package bzip2 lib32stdc++6 libc6-dev-i386 git -y
+      
+    - name: Install Toolchain
+      run: |
+          set -eo pipefail
+          git clone https://github.com/CruelKernel/aarch64-cruel-elf.git ${HOME}/toolchain
+          mkdir -p ${HOME}/toolchain_arm32
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz --output-document=${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
+          tar -xvf ${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz -C ${HOME}/toolchain_arm32
+        
+    - name: Build Kernel
+      run: |
+          set -eo pipefail
+          echo "  I: Building FreshCore CI $GITHUB_RUN_NUMBER"
+          export KBUILD_BUILD_VERSION=$GITHUB_RUN_NUMBER
+          ./build.sh a50cs ci
+          
+    - name: Prepare Release
+      run: |
+          mkdir -p ./release
+          mv -f `find ./ -iname FRSH_CORE_*.zip` ./release/
+          cp .config ./release/kernel_config_a50cs.txt
+
+    - name: Upload image artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 Kernel Image (staging-${{ github.run_number }}; NA)
+        path: 'tools/package/others/boot.img'
+        if-no-files-found: error
+
+    - name: Upload config artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 Kernel Config (staging-${{ github.run_number }}; NA)
+        path: 'release/kernel_config_a50cs.txt'
+        if-no-files-found: error
+
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: a50cs_release_staging-${{ github.run_number }})
+        path: 'release'
+        if-no-files-found: error
+
+  a50_aosp:
+    name: Build Galaxy A50 (AOSP)
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Manila"
+        timezoneMacos: "Asia/Manila"
+        timezoneWindows: "Philippine Standard Time"
+      
+    - name: Install Debian/Ubuntu dependencies
+      run: sudo apt-get install build-essential libelf-dev kernel-package bzip2 lib32stdc++6 libc6-dev-i386 git -y
+      
+    - name: Install Toolchain
+      run: |
+          set -eo pipefail
+          git clone https://github.com/CruelKernel/aarch64-cruel-elf.git ${HOME}/toolchain
+          mkdir -p ${HOME}/toolchain_arm32
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz --output-document=${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
+          tar -xvf ${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz -C ${HOME}/toolchain_arm32
+        
+    - name: Build Kernel
+      run: |
+          set -eo pipefail
+          echo "  I: Building FreshCore CI $GITHUB_RUN_NUMBER"
+          export KBUILD_BUILD_VERSION=$GITHUB_RUN_NUMBER
+          ./build-aosp.sh a50 ci
+          
+    - name: Prepare Release
+      run: |
+          mkdir -p ./release
+          mv -f `find ./ -iname FRSH_CORE_*.zip` ./release/
+          cp .config ./release/kernel_config_a50_aosp.txt
+
+    - name: Upload image artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 AOSP Kernel Image (staging-${{ github.run_number }})
+        path: 'tools/package/others/boot.img'
+        if-no-files-found: error
+
+    - name: Upload config artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 AOSP Kernel Config (staging-${{ github.run_number }})
+        path: 'release/kernel_config_a50_aosp.txt'
+        if-no-files-found: error
+
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: a50_aosp_release_staging-${{ github.run_number }})
+        path: 'release'
+        if-no-files-found: error
+
+  a50cs_aosp:
+    name: Build Galaxy A50 (AOSP; NA)
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Manila"
+        timezoneMacos: "Asia/Manila"
+        timezoneWindows: "Philippine Standard Time"
+      
+    - name: Install Debian/Ubuntu dependencies
+      run: sudo apt-get install build-essential libelf-dev kernel-package bzip2 lib32stdc++6 libc6-dev-i386 git -y
+      
+    - name: Install Toolchain
+      run: |
+          set -eo pipefail
+          git clone https://github.com/CruelKernel/aarch64-cruel-elf.git ${HOME}/toolchain
+          mkdir -p ${HOME}/toolchain_arm32
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz --output-document=${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
+          tar -xvf ${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz -C ${HOME}/toolchain_arm32
+        
+    - name: Build Kernel
+      run: |
+          set -eo pipefail
+          echo "  I: Building FreshCore CI $GITHUB_RUN_NUMBER"
+          export KBUILD_BUILD_VERSION=$GITHUB_RUN_NUMBER
+          ./build-aosp.sh a50cs ci
+          
+    - name: Prepare Release
+      run: |
+          mkdir -p ./release
+          mv -f `find ./ -iname FRSH_CORE_*.zip` ./release/
+          cp .config ./release/kernel_config_a50cs_aosp.txt
+
+    - name: Upload image artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 AOSP Kernel Image (staging-${{ github.run_number }}; NA)
+        path: 'tools/package/others/boot.img'
+        if-no-files-found: error
+
+    - name: Upload config artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 AOSP Kernel Config (staging-${{ github.run_number }}; NA)
+        path: 'release/kernel_config_a50cs_aosp.txt'
+        if-no-files-found: error
+
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: a50cs_aosp_release_staging-${{ github.run_number }})
+        path: 'release'
+        if-no-files-found: error
+
+  a50_recovery:
+    name: Build Galaxy A50 (Recovery)
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Manila"
+        timezoneMacos: "Asia/Manila"
+        timezoneWindows: "Philippine Standard Time"
+      
+    - name: Install Debian/Ubuntu dependencies
+      run: sudo apt-get install build-essential libelf-dev kernel-package bzip2 lib32stdc++6 libc6-dev-i386 git -y
+      
+    - name: Install Toolchain
+      run: |
+          set -eo pipefail
+          git clone https://github.com/CruelKernel/aarch64-cruel-elf.git ${HOME}/toolchain
+          mkdir -p ${HOME}/toolchain_arm32
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz --output-document=${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
+          tar -xvf ${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz -C ${HOME}/toolchain_arm32
+        
+    - name: Build Kernel
+      run: |
+          set -eo pipefail
+          echo "  I: Building FreshCore CI $GITHUB_RUN_NUMBER"
+          export KBUILD_BUILD_VERSION=$GITHUB_RUN_NUMBER
+          ./build-recovery.sh a50 ci
+          mv -f ./tools/aik/a50/split_img/boot.img-zImage ./Image
+          cp .config ./kernel_config_a50_recovery.txt
+
+    - name: Upload config artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 Kernel Config (staging-${{ github.run_number }})
+        path: 'kernel_config_a50_recovery.txt'
+        if-no-files-found: error
+
+  a50cs_recovery:
+    name: Build Galaxy A50 (Recovery; NA)
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Manila"
+        timezoneMacos: "Asia/Manila"
+        timezoneWindows: "Philippine Standard Time"
+      
+    - name: Install Debian/Ubuntu dependencies
+      run: sudo apt-get install build-essential libelf-dev kernel-package bzip2 lib32stdc++6 libc6-dev-i386 git -y
+      
+    - name: Install Toolchain
+      run: |
+          set -eo pipefail
+          git clone https://github.com/CruelKernel/aarch64-cruel-elf.git ${HOME}/toolchain
+          mkdir -p ${HOME}/toolchain_arm32
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz --output-document=${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
+          tar -xvf ${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz -C ${HOME}/toolchain_arm32
+        
+    - name: Build Kernel
+      run: |
+          set -eo pipefail
+          echo "  I: Building FreshCore CI $GITHUB_RUN_NUMBER"
+          export KBUILD_BUILD_VERSION=$GITHUB_RUN_NUMBER
+          ./build-recovery.sh a50cs ci
+          mv -f ./tools/aik/a50/split_img/boot.img-zImage ./Image
+          cp .config ./kernel_config_a50cs_recovery.txt
+
+    - name: Upload config artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50 Kernel Config (staging-${{ github.run_number }})
+        path: 'kernel_config_a50cs_recovery.txt'
+        if-no-files-found: error
+
+  a50s:
+    name: Build Galaxy A50s
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Manila"
+        timezoneMacos: "Asia/Manila"
+        timezoneWindows: "Philippine Standard Time"
+      
+    - name: Install Debian/Ubuntu dependencies
+      run: sudo apt-get install build-essential libelf-dev kernel-package bzip2 lib32stdc++6 libc6-dev-i386 git -y
+      
+    - name: Install Toolchain
+      run: |
+          set -eo pipefail
+          git clone https://github.com/CruelKernel/aarch64-cruel-elf.git ${HOME}/toolchain
+          mkdir -p ${HOME}/toolchain_arm32
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz --output-document=${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
+          tar -xvf ${HOME}/toolchain_arm32/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz -C ${HOME}/toolchain_arm32
+        
+    - name: Build Kernel
+      run: |
+          set -eo pipefail
+          echo "  I: Building FreshCore CI $GITHUB_RUN_NUMBER"
+          export KBUILD_BUILD_VERSION=$GITHUB_RUN_NUMBER
+          ./build.sh a50s ci
+          
+    - name: Prepare Release
+      run: |
+          mkdir -p ./release
+          mv -f `find ./ -iname FRSH_CORE_*.zip` ./release/
+          cp .config ./release/kernel_config_a50s.txt
+
+    - name: Upload image artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50s Kernel Image (staging-${{ github.run_number }})
+        path: 'tools/package/others/boot.img'
+        if-no-files-found: error
+
+    - name: Upload config artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Galaxy A50s Kernel Config (staging-${{ github.run_number }})
+        path: 'release/kernel_config_a50s.txt'
+        if-no-files-found: error
+
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: a50s_release_staging-${{ github.run_number }})
+        path: 'release'
+        if-no-files-found: error
+
+  release:
+    name: Release files and configs
+    if: always()
+    needs: [a50, a50_aosp, a50_recovery, a50cs, a50cs_aosp, a50cs_recovery, a50s]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Manila"
+        timezoneMacos: "Asia/Manila"
+        timezoneWindows: "Philippine Standard Time"
+        
+    - uses: JantHsueh/get-git-log-action@1.0
+      id: log
+      
+    - name: Merge Galaxy A50 (One UI) release
+      uses: actions/download-artifact@v2
+      with:
+        name: a50_release_staging-${{ github.run_number }})
+        path: release
+      
+    - name: Merge Galaxy A50 (AOSP) release
+      uses: actions/download-artifact@v2
+      with:
+        name: a50_aosp_release_staging-${{ github.run_number }})
+        path: release
+      
+    - name: Merge Galaxy A50 (One UI; NA) release
+      uses: actions/download-artifact@v2
+      with:
+        name: a50cs_release_staging-${{ github.run_number }})
+        path: release
+      
+    - name: Merge Galaxy A50 (AOSP; NA) release
+      uses: actions/download-artifact@v2
+      with:
+        name: a50cs_aosp_release_staging-${{ github.run_number }})
+        path: release
+      
+    - name: Merge Galaxy A50s release
+      uses: actions/download-artifact@v2
+      with:
+        name: a50s_release_staging-${{ github.run_number }})
+        path: release
+        
+    - name: Upload release
+      uses: Hs1r1us/Release-AIO@v1.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # The name of the tag
+        tag_name: ci_${{ github.run_number }}-staging
+        release_name: ci_staging-${{ github.run_number }}
+        body: ${{ steps.log.outputs.log }}
+        asset_files: './release'
