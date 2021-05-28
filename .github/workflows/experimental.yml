@@ -16,7 +16,13 @@ jobs:
       
     steps:
     - uses: actions/checkout@v2
-      
+
+    - uses: szenius/set-timezone@v1.0
+      with:
+        timezoneLinux: "Asia/Manila"
+        timezoneMacos: "Asia/Manila"
+        timezoneWindows: "Philippine Standard Time"
+        
     - name: Install Debian/Ubuntu dependencies
       run: sudo apt-get install build-essential libelf-dev kernel-package bzip2 lib32stdc++6 libc6-dev-i386 git -y
       
